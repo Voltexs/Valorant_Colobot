@@ -55,7 +55,7 @@ python main.py
 
 ```bash
 # Clone repository
-git clone [repository-url]
+git clone https://github.com/Voltexs/Valorant_Colobot
 
 # Compile Python code
 pyinstaller --onefile main.py
