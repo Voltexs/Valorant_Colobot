@@ -36,12 +36,12 @@ user32, kernel32, shcore = (
 shcore.SetProcessDpiAwareness(2)
 WIDTH, HEIGHT = [user32.GetSystemMetrics(0), user32.GetSystemMetrics(1)]
 
-ZONE = 4
+ZONE = 5
 GRAB_ZONE = (
     int(WIDTH / 2 - ZONE),
     int(HEIGHT / 2 - ZONE),
     int(WIDTH / 2 + ZONE),
-    int(HEIGHT / 2 + ZONE),
+    int(HEIGHT / 2 + ZONE)
 )
 
 class triggerbot:
@@ -85,26 +85,27 @@ class triggerbot:
             self.last_time = current_time
 
     def check_enem(self):
-        # Get screenshot of center area - using mss instead of pyautogui for better performance
+        # Get a higher resolution grab of the same area
         img = np.array(self.sct.grab(GRAB_ZONE))
         self.last_screenshot = img
         
-        # Color detection logic - optimized
         if self.triggerbot:
-            # Simplified color check for better performance
-            color_match = np.all(
-                (img >= [self.B - self.color_tolerance, 
-                        self.G - self.color_tolerance, 
-                        self.R - self.color_tolerance, 0]) & 
-                (img <= [self.B + self.color_tolerance, 
-                        self.G + self.color_tolerance, 
-                        self.R + self.color_tolerance, 255]), axis=2
-            )
+            # Upscale the image for sub-pixel scanning
+            img_upscaled = cv2.resize(img, (None), fx=2.0, fy=2.0, interpolation=cv2.INTER_LINEAR)
             
-            if np.any(color_match):
+            color_match = np.any(np.all(
+                (img_upscaled[:, :, :3] >= [self.B - self.color_tolerance * 1.2,
+                                          self.G - self.color_tolerance * 1.2, 
+                                          self.R - self.color_tolerance * 1.2]) & 
+                (img_upscaled[:, :, :3] <= [self.B + self.color_tolerance * 1.2, 
+                                          self.G + self.color_tolerance * 1.2, 
+                                          self.R + self.color_tolerance * 1.2]), axis=2
+            ))
+            
+            if color_match:
                 keyboard.press_and_release(self.shoot_key)
-                logging.info("Shot fired")
-                time.sleep(0.1)  # Minimal delay to prevent multiple shots
+                time.sleep(0.001)
+                logging.info("Shot fired - Nano detection")
 
         self.update_fps()
         return np.sum(img)

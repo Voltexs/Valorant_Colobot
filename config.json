@@ -1,7 +1,7 @@
 {
   "trigger_key": "0xA0",
-  "trigger_delay": 40,
-  "color_tolerance": 70,
+  "trigger_delay": 10,
+  "color_tolerance": 82,
   "abort_key": "f12",
   "rgb": [255, 255, 0],
   "shoot_key": "k",
